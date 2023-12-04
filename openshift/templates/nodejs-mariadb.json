@@ -2,10 +2,10 @@
   "kind": "Template",
   "apiVersion": "template.openshift.io/v1",
   "metadata": {
-    "name": "nodejs-mongodb-example",
+    "name": "nodejs-mariadb-example",
     "annotations": {
-      "openshift.io/display-name": "Node.js + MongoDB (Ephemeral)",
-      "description": "An example Node.js application with a MongoDB database. For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/nodejs-ex/blob/master/README.md.\n\nWARNING: Any data stored will be lost upon pod destruction. Only use this template for testing.",
+      "openshift.io/display-name": "Node.js + MariaDB (Ephemeral)",
+      "description": "An example Node.js application with a MariaDB database. For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/nodejs-ex/blob/master/README.md.\n\nWARNING: Any data stored will be lost upon pod destruction. Only use this template for testing.",
       "tags": "quickstart,nodejs,hidden",
       "iconClass": "icon-nodejs",
       "openshift.io/long-description": "This template defines resources needed to develop a NodeJS application, including a build configuration, application deployment configuration, and database deployment configuration.  The database is stored in non-persistent storage, so this configuration should be used for experimental purposes only.",
@@ -17,8 +17,8 @@
   },
   "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/sclorg/nodejs-ex/blob/master/README.md.",
   "labels": {
-      "template": "nodejs-mongodb-example",
-      "app": "nodejs-mongodb-example"
+      "template": "nodejs-mariadb-example",
+      "app": "nodejs-mariadb-example"
   },
   "objects": [
     {
@@ -147,40 +147,25 @@
       }
     },
     {
-      "kind": "DeploymentConfig",
-      "apiVersion": "apps.openshift.io/v1",
+      "kind": "Deployment",
+      "apiVersion": "apps/v1",
       "metadata": {
         "name": "${NAME}",
         "annotations": {
           "description": "Defines how to deploy the application server",
-          "template.alpha.openshift.io/wait-for-ready": "true"
+          "template.alpha.openshift.io/wait-for-ready": "true",
+          "image.openshift.io/triggers": "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"${NAME}:latest\"},\"fieldPath\": \"spec.template.spec.containers[0].image\"}]"
         }
       },
       "spec": {
         "strategy": {
           "type": "Recreate"
         },
-        "triggers": [
-          {
-            "type": "ImageChange",
-            "imageChangeParams": {
-              "automatic": true,
-              "containerNames": [
-                "nodejs-mongodb-example"
-              ],
-              "from": {
-                "kind": "ImageStreamTag",
-                "name": "${NAME}:latest"
-              }
-            }
-          },
-          {
-            "type": "ConfigChange"
-          }
-        ],
         "replicas": 1,
         "selector": {
-          "name": "${NAME}"
+          "matchLabels": {
+            "name": "${NAME}"
+          }
         },
         "template": {
           "metadata": {
@@ -192,7 +177,7 @@
           "spec": {
             "containers": [
               {
-                "name": "nodejs-mongodb-example",
+                "name": "nodejs-mariadb-example",
                 "image": " ",
                 "ports": [
                   {
@@ -205,7 +190,7 @@
                     "value": "${DATABASE_SERVICE_NAME}"
                   },
                   {
-                    "name": "MONGODB_USER",
+                    "name": "MARIADB_USER",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -214,7 +199,7 @@
                     }
                   },
                   {
-                    "name": "MONGODB_PASSWORD",
+                    "name": "MARIADB_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -223,11 +208,11 @@
                     }
                   },
                   {
-                    "name": "MONGODB_DATABASE",
+                    "name": "MARIADB_DATABASE",
                     "value": "${DATABASE_NAME}"
                   },
                   {
-                    "name": "MONGODB_ADMIN_PASSWORD",
+                    "name": "MARIADB_ADMIN_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -275,7 +260,7 @@
       "spec": {
         "ports": [
           {
-            "name": "mongodb",
+            "name": "mariadb",
             "port": 27017,
             "targetPort": 27017
           }
@@ -286,41 +271,25 @@
       }
     },
     {
-      "kind": "DeploymentConfig",
-      "apiVersion": "apps.openshift.io/v1",
+      "kind": "Deployment",
+      "apiVersion": "apps/v1",
       "metadata": {
         "name": "${DATABASE_SERVICE_NAME}",
         "annotations": {
           "description": "Defines how to deploy the database",
-          "template.alpha.openshift.io/wait-for-ready": "true"
+          "template.alpha.openshift.io/wait-for-ready": "true",
+          "image.openshift.io/triggers": "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"mariadb:${MARIADB_VERSION}\"},\"fieldPath\": \"spec.template.spec.containers[0].image\"}]"
         }
       },
       "spec": {
         "strategy": {
           "type": "Recreate"
         },
-        "triggers": [
-          {
-            "type": "ImageChange",
-            "imageChangeParams": {
-              "automatic": true,
-              "containerNames": [
-                "mongodb"
-              ],
-              "from": {
-                "kind": "ImageStreamTag",
-                "namespace": "${NAMESPACE}",
-                "name": "mongodb:${MONGODB_VERSION}"
-              }
-            }
-          },
-          {
-            "type": "ConfigChange"
-          }
-        ],
         "replicas": 1,
         "selector": {
-          "name": "${DATABASE_SERVICE_NAME}"
+          "matchLabels": {
+            "name": "${DATABASE_SERVICE_NAME}"
+          }
         },
         "template": {
           "metadata": {
@@ -332,7 +301,7 @@
           "spec": {
             "containers": [
               {
-                "name": "mongodb",
+                "name": "mariadb",
                 "image": " ",
                 "ports": [
                   {
@@ -341,7 +310,7 @@
                 ],
                 "env": [
                   {
-                    "name": "MONGODB_USER",
+                    "name": "MARIADB_USER",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -350,7 +319,7 @@
                     }
                   },
                   {
-                    "name": "MONGODB_PASSWORD",
+                    "name": "MARIADB_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -359,11 +328,11 @@
                     }
                   },
                   {
-                    "name": "MONGODB_DATABASE",
+                    "name": "MARIADB_DATABASE",
                     "value": "${DATABASE_NAME}"
                   },
                   {
-                    "name": "MONGODB_ADMIN_PASSWORD",
+                    "name": "MARIADB_ADMIN_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -380,7 +349,7 @@
                       "/bin/sh",
                       "-i",
                       "-c",
-                      "mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD --eval=\"quit()\""
+                      "mariadb 127.0.0.1:27017/$MARIADB_DATABASE -u $MARIADB_USER -p $MARIADB_PASSWORD --eval=\"quit()\""
                     ]
                   }
                 },
@@ -393,13 +362,13 @@
                 },
                 "resources": {
                   "limits": {
-                    "memory": "${MEMORY_MONGODB_LIMIT}"
+                    "memory": "${MEMORY_MARIADB_LIMIT}"
                   }
                 },
                 "volumeMounts": [
                   {
                     "name": "${DATABASE_SERVICE_NAME}-data",
-                    "mountPath": "/var/lib/mongodb/data"
+                    "mountPath": "/var/lib/mariadb/data"
                   }
                 ]
               }
@@ -423,7 +392,7 @@
       "displayName": "Name",
       "description": "The name assigned to all of the frontend objects defined in this template.",
       "required": true,
-      "value": "nodejs-mongodb-example"
+      "value": "nodejs-mariadb-example"
     },
     {
       "name": "NAMESPACE",
@@ -440,9 +409,9 @@
       "required": true
     },
     {
-      "name": "MONGODB_VERSION",
-      "displayName": "Version of MongoDB Image",
-      "description": "Version of MongoDB image to be used (3.6 or latest).",
+      "name": "MARIADB_VERSION",
+      "displayName": "Version of MariaDB Image",
+      "description": "Version of MariaDB image to be used (3.6 or latest).",
       "value": "3.6",
       "required": true
     },
@@ -454,9 +423,9 @@
       "value": "512Mi"
     },
     {
-      "name": "MEMORY_MONGODB_LIMIT",
-      "displayName": "Memory Limit (MongoDB)",
-      "description": "Maximum amount of memory the MongoDB container can use.",
+      "name": "MEMORY_MARIADB_LIMIT",
+      "displayName": "Memory Limit (MariaDB)",
+      "description": "Maximum amount of memory the MariaDB container can use.",
       "required": true,
       "value": "512Mi"
     },
@@ -501,19 +470,19 @@
       "name": "DATABASE_SERVICE_NAME",
       "displayName": "Database Service Name",
       "required": true,
-      "value": "mongodb"
+      "value": "mariadb"
     },
     {
       "name": "DATABASE_USER",
-      "displayName": "MongoDB Username",
-      "description": "Username for MongoDB user that will be used for accessing the database.",
+      "displayName": "MariaDB Username",
+      "description": "Username for MariaDB user that will be used for accessing the database.",
       "generate": "expression",
       "from": "user[A-Z0-9]{3}"
     },
     {
       "name": "DATABASE_PASSWORD",
-      "displayName": "MongoDB Password",
-      "description": "Password for the MongoDB user.",
+      "displayName": "MariaDB Password",
+      "description": "Password for the MariaDB user.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
     },
