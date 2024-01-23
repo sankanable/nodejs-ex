@@ -5,7 +5,7 @@
   "author": "Red Hat, Inc.",
   "license": "Apache-2.0",
   "scripts": {
-    "pretest": "npx eslint --ignore-path .gitignore .",
+    "pretest": "eslint --ignore-path .gitignore .",
     "test": "nyc --reporter=lcov mocha",
     "release": "standard-version -a",
     "openshift": "nodeshift --dockerImage=registry.access.redhat.com/ubi8/nodejs-20",
@@ -55,6 +55,7 @@
     "@opentelemetry/sdk-trace-node": "^1.6.0",
     "@opentelemetry/semantic-conventions": "^1.6.0",
     "eslint": "^8.33.0",
+    "eslint-config-semistandard": "^17.0.0",
     "body-parser": "^1.20.1",
     "express": "~4.18.1",
     "kube-service-bindings": "^2.1.0",
