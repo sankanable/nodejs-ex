@@ -137,19 +137,34 @@
         "name": "${NAME}",
         "annotations": {
           "description": "Defines how to deploy the application server",
-          "template.alpha.openshift.io/wait-for-ready": "true",
-          "image.openshift.io/triggers": "[{\"from\":{\"kind\":\"ImageStreamTag\",\"name\":\"${NAME}:latest\"},\"fieldPath\": \"spec.template.spec.containers[0].image\"}]"
+          "template.alpha.openshift.io/wait-for-ready": "true"
         }
       },
       "spec": {
         "strategy": {
-          "type": "RollingUpdate"
+          "type": "Rolling"
         },
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "nodejs-example"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${NAME}:latest"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
         "replicas": 1,
         "selector": {
-          "matchLabels": {
-            "name": "${NAME}"
-          }
+          "name": "${NAME}"
         },
         "template": {
           "metadata": {
