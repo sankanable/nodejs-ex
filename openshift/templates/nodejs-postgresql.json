@@ -2,23 +2,23 @@
   "kind": "Template",
   "apiVersion": "template.openshift.io/v1",
   "metadata": {
-    "name": "nodejs-mongodb-example",
+    "name": "nodejs-postgresql-example",
     "annotations": {
-      "openshift.io/display-name": "Node.js + MongoDB (Ephemeral)",
-      "description": "An example Node.js application with a MongoDB database. For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/nodejs-ex/blob/master/README.md.\n\nWARNING: Any data stored will be lost upon pod destruction. Only use this template for testing.",
-      "tags": "quickstart,nodejs,hidden",
+      "openshift.io/display-name": "Node.js + PostgreSQL (Ephemeral)",
+      "description": "An example Node.js application with a PostgreSQL database. For more information about using this template, including OpenShift considerations, see https://github.com/nodeshift-starters/nodejs-rest-http-crud/blob/master/README.md.\n\nWARNING: Any data stored will be lost upon pod destruction. Only use this template for testing.",
+      "tags": "quickstart,nodejs",
       "iconClass": "icon-nodejs",
       "openshift.io/long-description": "This template defines resources needed to develop a NodeJS application, including a build configuration, application deployment configuration, and database deployment configuration.  The database is stored in non-persistent storage, so this configuration should be used for experimental purposes only.",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
-      "openshift.io/documentation-url": "https://github.com/sclorg/nodejs-ex",
+      "openshift.io/documentation-url": "https://github.com/nodeshift-starters/nodejs-rest-http-crud",
       "openshift.io/support-url": "https://access.redhat.com",
       "template.openshift.io/bindable": "false"
     }
   },
-  "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/sclorg/nodejs-ex/blob/master/README.md.",
+  "message": "The following service(s) have been created in your project: ${NAME}, ${DATABASE_SERVICE_NAME}.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/nodeshift-starters/nodejs-rest-http-crud/blob/master/README.md.",
   "labels": {
-      "template": "nodejs-mongodb-example",
-      "app": "nodejs-mongodb-example"
+      "template": "nodejs-postgresql-example",
+      "app": "nodejs-postgresql-example"
   },
   "objects": [
     {
@@ -141,9 +141,7 @@
             }
           }
         ],
-        "postCommit": {
-          "script": "npm test"
-        }
+        "postCommit": {}
       }
     },
     {
@@ -151,6 +149,9 @@
       "apiVersion": "apps.openshift.io/v1",
       "metadata": {
         "name": "${NAME}",
+        "labels": {
+          "app.openshift.io/runtime": "nodejs"
+        },
         "annotations": {
           "description": "Defines how to deploy the application server",
           "template.alpha.openshift.io/wait-for-ready": "true"
@@ -166,7 +167,7 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "nodejs-mongodb-example"
+                "nodejs-postgresql-example"
               ],
               "from": {
                 "kind": "ImageStreamTag",
@@ -186,13 +187,14 @@
           "metadata": {
             "name": "${NAME}",
             "labels": {
-              "name": "${NAME}"
+              "name": "${NAME}",
+              "app.openshift.io/runtime": "nodejs"
             }
           },
           "spec": {
             "containers": [
               {
-                "name": "nodejs-mongodb-example",
+                "name": "nodejs-postgresql-example",
                 "image": " ",
                 "ports": [
                   {
@@ -205,7 +207,7 @@
                     "value": "${DATABASE_SERVICE_NAME}"
                   },
                   {
-                    "name": "MONGODB_USER",
+                    "name": "POSTGRESQL_USER",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -214,7 +216,7 @@
                     }
                   },
                   {
-                    "name": "MONGODB_PASSWORD",
+                    "name": "POSTGRESQL_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -223,11 +225,11 @@
                     }
                   },
                   {
-                    "name": "MONGODB_DATABASE",
+                    "name": "POSTGRESQL_DATABASE",
                     "value": "${DATABASE_NAME}"
                   },
                   {
-                    "name": "MONGODB_ADMIN_PASSWORD",
+                    "name": "POSTGRESQL_ADMIN_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -275,9 +277,9 @@
       "spec": {
         "ports": [
           {
-            "name": "mongodb",
-            "port": 27017,
-            "targetPort": 27017
+            "name": "postgresql",
+            "port": 5432,
+            "targetPort": 5432
           }
         ],
         "selector": {
@@ -305,12 +307,12 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "mongodb"
+                "postgresql"
               ],
               "from": {
                 "kind": "ImageStreamTag",
                 "namespace": "${NAMESPACE}",
-                "name": "mongodb:${MONGODB_VERSION}"
+                "name": "postgresql:${POSTGRESQL_VERSION}"
               }
             }
           },
@@ -332,16 +334,16 @@
           "spec": {
             "containers": [
               {
-                "name": "mongodb",
+                "name": "postgresql",
                 "image": " ",
                 "ports": [
                   {
-                    "containerPort": 27017
+                    "containerPort": 5432
                   }
                 ],
                 "env": [
                   {
-                    "name": "MONGODB_USER",
+                    "name": "POSTGRESQL_USER",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -350,7 +352,7 @@
                     }
                   },
                   {
-                    "name": "MONGODB_PASSWORD",
+                    "name": "POSTGRESQL_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -359,11 +361,11 @@
                     }
                   },
                   {
-                    "name": "MONGODB_DATABASE",
+                    "name": "POSTGRESQL_DATABASE",
                     "value": "${DATABASE_NAME}"
                   },
                   {
-                    "name": "MONGODB_ADMIN_PASSWORD",
+                    "name": "POSTGRESQL_ADMIN_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef" : {
                         "name" : "${NAME}",
@@ -372,34 +374,22 @@
                     }
                   }
                 ],
-                "readinessProbe": {
-                  "timeoutSeconds": 1,
-                  "initialDelaySeconds": 3,
-                  "exec": {
-                    "command": [
-                      "/bin/sh",
-                      "-i",
-                      "-c",
-                      "mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD --eval=\"quit()\""
-                    ]
-                  }
-                },
                 "livenessProbe": {
                   "timeoutSeconds": 1,
                   "initialDelaySeconds": 30,
                   "tcpSocket": {
-                    "port": 27017
+                    "port": 5432
                   }
                 },
                 "resources": {
                   "limits": {
-                    "memory": "${MEMORY_MONGODB_LIMIT}"
+                    "memory": "${MEMORY_POSTGRESQL_LIMIT}"
                   }
                 },
                 "volumeMounts": [
                   {
                     "name": "${DATABASE_SERVICE_NAME}-data",
-                    "mountPath": "/var/lib/mongodb/data"
+                    "mountPath": "/var/lib/postgresql/data"
                   }
                 ]
               }
@@ -423,7 +413,7 @@
       "displayName": "Name",
       "description": "The name assigned to all of the frontend objects defined in this template.",
       "required": true,
-      "value": "nodejs-mongodb-example"
+      "value": "nodejs-postgresql-example"
     },
     {
       "name": "NAMESPACE",
@@ -435,15 +425,15 @@
     {
       "name": "NODEJS_VERSION",
       "displayName": "Version of NodeJS Image",
-      "description": "Version of NodeJS image to be used (10, 12, or latest).",
-      "value": "12",
+      "description": "Version of NodeJS image to be used (14-ubi8, 16-ubi8, or latest).",
+      "value": "16-ubi8",
       "required": true
     },
     {
-      "name": "MONGODB_VERSION",
-      "displayName": "Version of MongoDB Image",
-      "description": "Version of MongoDB image to be used (3.6 or latest).",
-      "value": "3.6",
+      "name": "POSTGRESQL_VERSION",
+      "displayName": "Version of PostgreSQL Image",
+      "description": "Version of PostgreSQL image to be used (12-el8, or latest).",
+      "value": "12-el8",
       "required": true
     },
     {
@@ -451,21 +441,21 @@
       "displayName": "Memory Limit",
       "description": "Maximum amount of memory the Node.js container can use.",
       "required": true,
-      "value": "512Mi"
+      "value": "256Mi"
     },
     {
-      "name": "MEMORY_MONGODB_LIMIT",
-      "displayName": "Memory Limit (MongoDB)",
-      "description": "Maximum amount of memory the MongoDB container can use.",
+      "name": "MEMORY_POSTGRESQL_LIMIT",
+      "displayName": "Memory Limit (PostgreSQL)",
+      "description": "Maximum amount of memory the PostgreSQL container can use.",
       "required": true,
-      "value": "512Mi"
+      "value": "256Mi"
     },
     {
       "name": "SOURCE_REPOSITORY_URL",
       "displayName": "Git Repository URL",
       "description": "The URL of the repository with your application source code.",
       "required": true,
-      "value": "https://github.com/sclorg/nodejs-ex.git"
+      "value": "https://github.com/nodeshift-starters/nodejs-rest-http-crud.git"
     },
     {
       "name": "SOURCE_REPOSITORY_REF",
@@ -501,19 +491,19 @@
       "name": "DATABASE_SERVICE_NAME",
       "displayName": "Database Service Name",
       "required": true,
-      "value": "mongodb"
+      "value": "postgresql"
     },
     {
       "name": "DATABASE_USER",
-      "displayName": "MongoDB Username",
-      "description": "Username for MongoDB user that will be used for accessing the database.",
+      "displayName": "PostgreSQL Username",
+      "description": "Username for PostgreSQL user that will be used for accessing the database.",
       "generate": "expression",
       "from": "user[A-Z0-9]{3}"
     },
     {
       "name": "DATABASE_PASSWORD",
-      "displayName": "MongoDB Password",
-      "description": "Password for the MongoDB user.",
+      "displayName": "PostgreSQL Password",
+      "description": "Password for the PostgreSQL user.",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
     },
@@ -521,7 +511,7 @@
       "name": "DATABASE_NAME",
       "displayName": "Database Name",
       "required": true,
-      "value": "sampledb"
+      "value": "my_data"
     },
     {
       "name": "DATABASE_ADMIN_PASSWORD",
