@@ -10,7 +10,7 @@
       "iconClass": "icon-nodejs",
       "openshift.io/long-description": "This template defines resources needed to develop a NodeJS application, including a build configuration, application deployment configuration, and database deployment configuration.",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
-      "openshift.io/documentation-url": "https://github.com/nodeshift-starters/nodejs-rest-http-crud",
+      "openshift.io/documentation-url": "https://github.com/sclorg/nodejs-ex",
       "openshift.io/support-url": "https://access.redhat.com",
       "template.openshift.io/bindable": "false"
     }
@@ -60,7 +60,10 @@
       "kind": "Route",
       "apiVersion": "route.openshift.io/v1",
       "metadata": {
-        "name": "${NAME}"
+        "name": "${NAME}",
+        "annotations": {
+          "template.openshift.io/expose-uri": "http://{.spec.host}{.spec.path}"
+        }
       },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
@@ -179,7 +182,7 @@
           "spec": {
             "containers": [
               {
-                "name": "nodejs-postgresql-persistent",
+                "name": "${NAME}",
                 "image": " ",
                 "ports": [
                   {
@@ -448,7 +451,7 @@
       "displayName": "Git Repository URL",
       "description": "The URL of the repository with your application source code.",
       "required": true,
-      "value": "https://github.com/nodeshift-starters/nodejs-rest-http-crud.git"
+      "value": "https://github.com/sclorg/nodejs-ex.git"
     },
     {
       "name": "SOURCE_REPOSITORY_REF",
