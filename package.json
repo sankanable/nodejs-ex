@@ -10,8 +10,8 @@
     "openshift": "nodeshift --dockerImage=registry.access.redhat.com/ubi8/nodejs-20",
     "openshift:enable:trace": "nodeshift --deploy.env NODE_OPTIONS='--require ./tracing.js' --dockerImage=registry.access.redhat.com/ubi8/nodejs-20",
      "start": "node server.js",
-    "dev": "node . | npx pino-pretty",
-    "dev:debug": "DEBUG=* node . "
+    "dev": "node server.js | npx pino-pretty",
+    "dev:debug": "DEBUG=* node server.js"
   },
   "main": "server.js",
   "files": [
