@@ -26,6 +26,7 @@ app.get('/', (req, res) => {
   res.send('🌐 Hello from OpenShift + Node.js + PostgreSQL!');
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 App running on port ${port}`);
 });
+
